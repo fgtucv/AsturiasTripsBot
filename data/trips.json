@@ -1,0 +1,20 @@
+{
+  "id": "eaec785d-fe23-446c-8e93-bd0755f4f441",
+  "created_at": "2026-10-17T08:00:00Z",
+  "title": "Поїздка в гори",
+  "description": "Легкий маршрут по 'ruta Del Cares'. З трансфером з Овєдо.",
+  "started_at": "2026-10-20T12:00:00Z",
+  "difficulty_level": 4,
+  "price": 20.10,
+  "destination": {
+    "name": "ruta Del Cares",
+    "url": "https://share.google/cuQCTdFunRgMYQNy0"
+  },
+  "start_point": {
+    "name": "Автовокзал Овєдо",
+    "url": "https://maps.app.goo.gl/bY4XARfya6coXMLj8"
+  },
+  "max_participants": 7,
+  "current_participants": 1,
+  "transfer": true
+}
