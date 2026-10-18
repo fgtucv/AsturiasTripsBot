@@ -1,30 +1,23 @@
-import { config } from "../config/env.js";
-import { createClient } from "@supabase/supabase-js";
-
-const API = config.api;
-const API_SECRET_KEY = config.apiSecretKey;
-
-const supabase = createClient(API, API_SECRET_KEY);
+import { findOrCreateUser } from "../services/userServices.js";
+import { generalKeyboards } from "../keyboards/generalKeyboards.js";
 
 export async function start(ctx) {
-    const { id, first_name, last_name, username } = ctx.update.message.from;
+    try {
+        const user = ctx.update.message.from;
 
-    let { data: user, error } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', id)
-        .maybeSingle();
+        const isRegister = await findOrCreateUser(user);
 
-    if (!user) {
-        const { data: newUser, error } = await supabase
-            .from('users')
-            .insert([{ id: id, first_name: first_name, last_name: last_name, username: username }])
-            .select()
-            .single();
+        if (isRegister) {
+            await ctx.reply(`Ласкаво просимо, ${user.first_name}! Ваш акаунт створено.`);
+        } else {
+            await ctx.reply(`З поверненням, ${user.first_name}!`);
+        }
 
-        user = newUser
-        await ctx.reply(`Ласкаво просимо, ${first_name}. Ви усішно зареєстровані!`);
-    } else (
-        await ctx.reply(`З поверненям, ${first_name}`)
-    )
+        await ctx.reply("Оберіть дію:", {
+            reply_markup: generalKeyboards
+        });
+    } catch (error) {
+        console.error("Помилка під час виконання команди start:", error.message || error);
+        await ctx.reply("Сталася помилка при обробці запиту.");
+    }
 }
