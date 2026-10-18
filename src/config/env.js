@@ -12,7 +12,5 @@ for (const envVar of envVars) {
 export const config = {
     botToken: process.env.BOT_TOKEN,
     apiSecretKey: process.env.API_SECRET_KEY,
-    tripsApi: process.env.TRIPS_API,
-    participantsApi: process.env.PARTICIPANTS_API,
-    usersApi: process.env.USERS_API
+    api: process.env.API
 }

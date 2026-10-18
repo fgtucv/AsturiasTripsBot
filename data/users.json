@@ -4,5 +4,6 @@
   "first_name": "Олесь",
   "last_name": "Слава",
   "username": "olesslava23",
-  "is_blocked": false
+  "is_blocked": false,
+  "is_admin": true
 }
