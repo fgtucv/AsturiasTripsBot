@@ -1,5 +1,4 @@
 import { supabase } from "../config/supabase.js";
-
 import { getUserServic } from "./getUserServic.js";
 
 async function getTripParticipants(tripId) {
