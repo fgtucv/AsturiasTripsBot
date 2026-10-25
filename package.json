@@ -19,8 +19,11 @@
   },
   "homepage": "https://github.com/fgtucv/AsturiasTripsBot#readme",
   "dependencies": {
+    "@grammyjs/conversations": "^2.1.1",
     "@supabase/supabase-js": "^2.118.0",
+    "dayjs": "^1.11.23",
     "dotenv": "^18.0.8",
-    "grammy": "^1.46.0"
+    "grammy": "^1.46.0",
+    "telegram-inline-calendar": "^2.4.0"
   }
 }
