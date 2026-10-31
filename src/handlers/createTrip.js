@@ -11,7 +11,7 @@ import { addTripToTrips } from "../services/addNewTrip.js";
 dayjs.extend(customParseFormat);
 
 async function askText(conversation, ctx, question) {
-    await ctx.reply(question);
+    await ctx.reply(question, { reply_markup: getStopDialogKeyboard() });
     const { message } = await conversation.waitFor("message:text");
     const text = message.text.trim();
 
@@ -50,24 +50,13 @@ async function askUrl(conversation, ctx, question) {
     }
 }
 
-async function askYesNo(conversation, ctx, question) {
-    while (true) {
-        const answer = (await askText(conversation, ctx, question)).toLowerCase();
-
-        if (answer === "так") return true;
-        if (answer === "ні") return false;
-
-        await ctx.reply("Напишіть «так» або «ні».");
-    }
-}
-
 async function askDate(conversation, ctx) {
     while (true) {
         await calendar.startNavCalendar(ctx);
 
         let res = -1;
         while (res === -1) {
-            const cb = await conversation.waitFor("callback_query:data");
+            const cb = await conversation.waitFor("callback_query:data", "message:text");
 
             if (cb.msg?.message_id !== calendar.chats.get(cb.chat.id)) continue;
 
@@ -80,7 +69,8 @@ async function askDate(conversation, ctx) {
             await ctx.reply("Не вдалося розпізнати дату, оберіть ще раз.");
             continue;
         }
-        if (parsed.isBefore(dayjs())) {
+
+        if (parsed.isBefore(dayjs(await conversation.now()))) {
             await ctx.reply("Цей час вже минув, оберіть ще раз.");
             continue;
         }
@@ -90,66 +80,59 @@ async function askDate(conversation, ctx) {
 }
 
 export async function createTrip(conversation, ctx) {
+    const title = await askText(
+        conversation, ctx,
+        "Введіть заголовок для поїздки (або натисніть «Стоп» для скасування):"
+    );
+
+    const date = await askDate(conversation, ctx);
+
+    const description = await askText(conversation, ctx, "Введіть опис поїздки:");
+
+    const difficultyLevel = await askNumber(
+        conversation, ctx,
+        "Введіть важкість поїздки від 1 до 5:",
+        { min: 1, max: 5, integer: true }
+    );
+
+    const price = await askNumber(
+        conversation, ctx,
+        "Введіть ціну за людину:",
+        { min: 0, max: 100000 }
+    );
+
+    const destinationName = await askText(conversation, ctx, "Введіть місце призначення:");
+    const destinationUrl = await askUrl(conversation, ctx, "Введіть посилання на місце призначення:");
+
+    const startPointName = await askText(conversation, ctx, "Введіть місце збору (початку):");
+    const startPointUrl = await askUrl(conversation, ctx, "Введіть посилання на місце збору:");
+
+    const maxParticipants = await askNumber(
+        conversation, ctx,
+        "Введіть максимальну кількість учасників:",
+        { min: 1, max: 100, integer: true }
+    );
+
+    const newTrip = {
+        started_at: date,
+        title,
+        description,
+        difficulty_level: difficultyLevel,
+        price: price.toFixed(2),
+        destination_name: destinationName,
+        destination_url: destinationUrl,
+        start_point_name: startPointName,
+        start_point_url: startPointUrl,
+        max_participants: maxParticipants,
+    };
+
     try {
-        const title = await askText(
-            conversation, ctx,
-            "Введіть заголовок для поїздки (або натисніть «Стоп» для скасування):"
-        );
-
-        const date = await askDate(conversation, ctx);
-
-        const description = await askText(conversation, ctx, "Введіть опис поїздки:");
-
-        const difficultyLevel = await askNumber(
-            conversation, ctx,
-            "Введіть важкість поїздки від 1 до 5:",
-            { min: 1, max: 10, integer: true }
-        );
-
-        const price = await askNumber(
-            conversation, ctx,
-            "Введіть ціну за людину:",
-            { min: 0, max: 100000 }
-        );
-
-        const destinationName = await askText(conversation, ctx, "Введіть місце призначення:");
-        const destinationUrl = await askUrl(conversation, ctx, "Введіть посилання на місце призначення:");
-
-        const startPointName = await askText(conversation, ctx, "Введіть місце збору (початку):");
-        const startPointUrl = await askUrl(conversation, ctx, "Введіть посилання на місце збору:");
-
-        const maxParticipants = await askNumber(
-            conversation, ctx,
-            "Введіть максимальну кількість учасників:",
-            { min: 1, max: 100, integer: true }
-        );
-
-        const transfer = await askYesNo(conversation, ctx, "Чи доступний трансфер? (так або ні)");
-
-        const newTrip = {
-            started_at: date,
-            title,
-            description,
-            difficulty_level: difficultyLevel,
-            price: price.toFixed(2),
-            destination_name: destinationName,
-            destination_url: destinationUrl,
-            start_point_name: startPointName,
-            start_point_url: startPointUrl,
-            max_participants: maxParticipants,
-            transfer,
-        };
-
-        try {
-            await conversation.external(() => addTripToTrips(newTrip));
-        } catch (error) {
-            console.error(error);
-            await ctx.reply("Не вдалося зберегти поїздку. Спробуйте ще раз пізніше.");
-            return;
-        }
-
-        await ctx.reply(`Поїздку «${title}» створено ✅`);
+        await conversation.external(() => addTripToTrips(newTrip));
     } catch (error) {
-        throw error;
+        console.error(error);
+        await ctx.reply("Не вдалося зберегти поїздку. Спробуйте ще раз пізніше.", { reply_markup: getFullKeyboard(ctx.update.message.from.id) });
+        return;
     }
+
+    await ctx.reply(`Поїздку «${title}» створено ✅`, { reply_markup: getFullKeyboard(ctx.from.id) });
 }
