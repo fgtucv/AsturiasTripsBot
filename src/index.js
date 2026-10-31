@@ -15,11 +15,6 @@ const bot = new Bot(config.botToken);
 
 bot.use(conversations());
 
-bot.hears("Стоп", async (ctx) => {
-    await ctx.conversation.exitAll();
-    await ctx.reply("Створення поїздки скасовано");
-})
-
 export const calendar = new Calendar(bot, {
     date_format: "DD.MM.YYYY HH:mm",
     language: "uk",
@@ -33,9 +28,23 @@ export const calendar = new Calendar(bot, {
 bot.use(createConversation(createTrip, "createTrip"));
 
 bot.command("start", (ctx) => start(ctx));
+
 bot.hears('🔍 Знати поїздки', (ctx) => search(ctx));
 bot.hears('🚗 Мої поїздки', (ctx) => myTrips(ctx));
 bot.hears('Створити гру ➕', (ctx) => ctx.conversation.enter("createTrip"));
+bot.hears("Стоп ⛔", async (ctx) => {
+    const active = await ctx.conversation.active();
+
+    if (Object.keys(active).length > 0) {
+        await ctx.conversation.exitAll();
+        await ctx.reply("Створення поїздки скасовано");
+        return;
+    }
+
+    await ctx.reply("Ви нічого не створюєте");
+});
+
 bot.callbackQuery(/^join_to_(.+)$/, joinToTrip);
-bot.callbackQuery(/^leave_from_(.+)$/, leaveFromTrip)
+bot.callbackQuery(/^leave_from_(.+)$/, leaveFromTrip);
+
 bot.start();
