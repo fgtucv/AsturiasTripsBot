@@ -1,10 +1,7 @@
 import { getLeaveServices, deletParticipantService } from "../services/leaveService.js";
 
-function changeParticipants(userId, participants) {
-    const indexToDeleted = participants.findIndex((p) => p.id === userId);
-    const removed = participants.splice(indexToDeleted, 1)
-    
-    return participants;
+function changeParticipants(userId, participants) {  
+    return participants.filter((p) => p.id !== userId);
 }
 
 export async function leaveFromTrip(ctx) {
