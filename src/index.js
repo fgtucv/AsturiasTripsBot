@@ -1,5 +1,7 @@
 import { Bot } from "grammy";
+
 import { config } from "./config/env.js";
+import { adminsIds } from "./config/constants.js";
 
 import { conversations, createConversation } from "@grammyjs/conversations";
 
@@ -32,7 +34,7 @@ bot.hears("Стоп ⛔", async (ctx) => {
 
     if (Object.keys(active).length > 0) {
         await ctx.conversation.exitAll();
-        await ctx.reply("Створення поїздки скасовано", { reply_markup: getFullKeyboard(ctx.from.id)});
+        await ctx.reply("Створення поїздки скасовано", { reply_markup: getFullKeyboard(ctx.from.id) });
         return;
     }
 
@@ -45,7 +47,13 @@ bot.command("start", (ctx) => start(ctx));
 
 bot.hears('🔍 Знати поїздки', (ctx) => search(ctx));
 bot.hears('🚗 Мої поїздки', (ctx) => myTrips(ctx));
-bot.hears('Створити гру ➕', (ctx) => ctx.conversation.enter("createTrip"));
+bot.hears('Створити гру ➕', (ctx) => {
+    if (adminsIds.includes(ctx.from.id)) {
+        ctx.conversation.enter("createTrip");
+    } else {
+        ctx.reply("Поїздки може створювати тільки адмін")
+    }
+});
 
 bot.callbackQuery(/^join_to_(.+)$/, joinToTrip);
 bot.callbackQuery(/^leave_from_(.+)$/, leaveFromTrip);

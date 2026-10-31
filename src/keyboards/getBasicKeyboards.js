@@ -1,6 +1,6 @@
 import { Keyboard } from "grammy";
 
-const adminsIds = [1731256605];
+import { adminsIds } from "../config/constants.js";
 
 function getAdminKeyboard() {
     return new Keyboard().text("Створити гру ➕");
