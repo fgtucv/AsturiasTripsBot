@@ -1,20 +1,20 @@
-import { joinToTripService } from "../services/joinServices.js";
+import { joinTrip } from "../services/participantsService.js";
 
 export async function joinToTrip(ctx) {
-    try {
-        const tripId = ctx.match[1];
-        const userId = ctx.update.callback_query.from.id;
-        const result = await joinToTripService(tripId, userId);
+    const tripId = ctx.match[1];
+    const userId = ctx.update.callback_query.from.id;
 
-        if (!result.success) {
-            await ctx.reply(`Помилка, невдалось приєднатися до поїздки: ${result?.error}`);
-        } else if (!result.joined) {
-            await ctx.reply("Ви вже приєднані до цієї поіздки");
-        } else if (result.joined) {
-            await ctx.reply("Ви успішно доєднались");
+    try {
+        const isJoined = await joinTrip(tripId, userId);
+
+        if (!isJoined) {
+            await ctx.reply("Ви вже приєднані до цієї поїздки");
+        } else if (isJoined) {
+            await ctx.reply("Ви успішно приєднались до поїздки");
         }
     } catch (error) {
-        await ctx.reply(`Помилка: ${error.message}`);
+        console.error(error);
+        await ctx.reply(`Помилка, не вдалося приєднатися до поїздки.`);
     }
 
     await ctx.answerCallbackQuery();

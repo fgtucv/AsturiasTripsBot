@@ -1,19 +1,5 @@
-import { getTripsParticipants, getTripsByIds } from "../services/getTripsParticipants.js";
+import { getUserTrips } from "../services/participantsService.js";
 import { getLeaveKeyboard } from "../keyboards/getLeaveKeyboard.js";
-
-function madeUserTripsArray(trips, userId) {
-    const userTripsArray = [];
-
-    for (const trip of trips) {
-        const isUserTrip = trip.participants.some((p) => p.id === userId);
-
-        if (isUserTrip) {
-            userTripsArray.push(trip.trip_id);
-        }
-    }
-
-    return userTripsArray;
-}
 
 function madeTripMasseg(trip) {
     const startDate = new Date(trip.started_at).toLocaleString('uk-UA', {
@@ -43,27 +29,16 @@ export async function myTrips(ctx) {
     const userId = ctx.update.message.from.id;
 
     try {
-        const { data, error } = await getTripsParticipants();
+        const userTrips = await getUserTrips(userId);
 
-        if (error) throw new Error(error.message);
-        if (!data) {
-            await ctx.reply("Помилка в роботі бота дані не прийшли.")
+        if (userTrips.length === 0) {
+            await ctx.reply("У вас немає поїздок.");
             return;
-        };
-
-        const userTripsId = madeUserTripsArray(data, userId);
-
-        if (userTripsId.length === 0) {
-            await ctx.reply("Ви ще недоїдналися до поїздок")
         }
 
-        try {
-            const { trips } = await getTripsByIds(userTripsId);
-            for (const trip of trips) {
-                await ctx.reply(madeTripMasseg(trip), { reply_markup: getLeaveKeyboard(trip.id), parse_mode: 'Markdown', disable_web_page_preview: true });
-            }
-        } catch (error) {
-            await ctx.reply(`Помилка: ${error.message}`)
+        for (const trip of userTrips) {
+            const message = madeTripMasseg(trip);
+            await ctx.reply(message, { reply_markup: getLeaveKeyboard(trip.id) });
         }
 
     } catch (error) {

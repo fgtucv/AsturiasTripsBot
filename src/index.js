@@ -12,7 +12,7 @@ import { start } from "./handlers/start.js";
 import { myTrips } from "./handlers/mytrips.js";
 import { joinToTrip } from "./handlers/joinToTrip.js";
 import { leaveFromTrip } from "./handlers/leaveFromTrip.js";
-import { createTrip } from "./handlers/createTrip.js";
+import { createTripDialog } from "./handlers/createTrip.js";
 import { Calendar } from "telegram-inline-calendar";
 
 const bot = new Bot(config.botToken);
@@ -41,17 +41,17 @@ bot.hears("Стоп ⛔", async (ctx) => {
     await ctx.reply("Ви нічого не створюєте");
 });
 
-bot.use(createConversation(createTrip, "createTrip"));
+bot.use(createConversation(createTripDialog, "createTrip"));
 
 bot.command("start", (ctx) => start(ctx));
 
 bot.hears('🔍 Знати поїздки', (ctx) => search(ctx));
 bot.hears('🚗 Мої поїздки', (ctx) => myTrips(ctx));
-bot.hears('Створити гру ➕', (ctx) => {
+bot.hears('Створити гру ➕', async (ctx) => {
     if (adminsIds.includes(ctx.from.id)) {
-        ctx.conversation.enter("createTrip");
+        await ctx.conversation.enter("createTrip");
     } else {
-        ctx.reply("Поїздки може створювати тільки адмін")
+        await ctx.reply("Поїздки може створювати тільки адмін")
     }
 });
 

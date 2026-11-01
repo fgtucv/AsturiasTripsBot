@@ -1,4 +1,4 @@
-import { getTrips } from "../services/searchServices.js";
+import { getUpcomingTrips } from "../services/tripService.js";
 import { getJoinKeyboard } from "../keyboards/getJoinKeyboard.js";
 
 function formatTripMessage(trip) {
@@ -27,7 +27,7 @@ ${trip.description || ''}
 
 export async function search(ctx) {
     try {
-        const trips = await getTrips();
+        const trips = await getUpcomingTrips();
 
         await ctx.reply(trips.length > 0 ? `Знайдено ${trips.length} поїздки 👇:` : "Немає доступних поїздок");
         for (const trip of trips) {

@@ -1,23 +1,20 @@
-import { getLeaveServices, deletParticipantService } from "../services/leaveService.js";
-
-function changeParticipants(userId, participants) {  
-    return participants.filter((p) => p.id !== userId);
-}
+import { leaveTrip } from "../services/participantsService.js";
 
 export async function leaveFromTrip(ctx) {
     const tripId = ctx.match[1];
     const userId = ctx.update.callback_query.from.id;
 
-    try {
-        const result = await getLeaveServices(tripId, userId);
-        const deletParticipant = await deletParticipantService(changeParticipants(userId, result), tripId);
+    // console.log("leaveFromTrip tripId:", ctx.match);
+    // console.log("leaveFromTrip userId:", userId);
 
-        if(!deletParticipant) ctx.reply("Ви відмовилтся від поїздки");
+    try {
+        const isLeaved = await leaveTrip(tripId, userId);
+
+        if(isLeaved) await ctx.reply("Ви відмовилтся від поїздки");
+        if(!isLeaved) await ctx.reply("Ви не були учасником цієї поїздки");
     } catch (error) {
         await ctx.reply(`Помилка: ${error}, не вдалось покинути поїздку`)
     }
-
-
 
     await ctx.answerCallbackQuery();
 }

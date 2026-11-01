@@ -6,7 +6,7 @@ import { calendar } from "../index.js";
 import { getFullKeyboard } from "../keyboards/getBasicKeyboards.js";
 import { getStopDialogKeyboard } from "../keyboards/getStopDialogKeyboard.js";
 
-import { addTripToTrips } from "../services/addNewTrip.js";
+import { createTrip } from "../services/tripService.js";
 
 dayjs.extend(customParseFormat);
 
@@ -79,7 +79,7 @@ async function askDate(conversation, ctx) {
     }
 }
 
-export async function createTrip(conversation, ctx) {
+export async function createTripDialog(conversation, ctx) {
     const title = await askText(
         conversation, ctx,
         "Введіть заголовок для поїздки (або натисніть «Стоп» для скасування):"
@@ -127,7 +127,7 @@ export async function createTrip(conversation, ctx) {
     };
 
     try {
-        await conversation.external(() => addTripToTrips(newTrip));
+        await conversation.external(() => createTrip(newTrip));
     } catch (error) {
         console.error(error);
         await ctx.reply("Не вдалося зберегти поїздку. Спробуйте ще раз пізніше.", { reply_markup: getFullKeyboard(ctx.update.message.from.id) });
