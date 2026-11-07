@@ -1,4 +1,5 @@
 import { Bot } from "grammy";
+import { express } from "express"
 
 import { config } from "./config/env.js";
 import { adminsIds } from "./config/constants.js";
@@ -15,7 +16,18 @@ import { leaveFromTrip } from "./handlers/leaveFromTrip.js";
 import { createTripDialog } from "./handlers/createTrip.js";
 import { Calendar } from "telegram-inline-calendar";
 
+const app = express();
 const bot = new Bot(config.botToken);
+
+const PORT = Number(config.port) || 3000;
+
+app.get('/', (req, res) => {
+    res.send('Telegram bot is actived and running 24/7')
+});
+
+app.listen(PORT, () => {
+    console.log(`Вебсервер успішно запущено на порті ${PORT}`)
+});
 
 bot.use(conversations());
 
@@ -58,4 +70,11 @@ bot.hears('Створити гру ➕', async (ctx) => {
 bot.callbackQuery(/^join_to_(.+)$/, joinToTrip);
 bot.callbackQuery(/^leave_from_(.+)$/, leaveFromTrip);
 
-bot.start();
+bot.start({
+    onStart: (botInfo) => {
+        console.log(`Бот @${botInfo.username} успішно запущено та працює!`);
+    },
+});
+
+process.once('SIGINT', () => bot.stop());
+process.once('SIGTERM', () => bot.stop());
