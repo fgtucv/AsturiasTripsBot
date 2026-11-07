@@ -1,13 +1,13 @@
 import "dotenv/config";
 
 
-const envVars = ['BOT_TOKEN', 'API_SECRET_KEY'];
+// const envVars = ['BOT_TOKEN', 'API_SECRET_KEY'];
 
-for (const envVar of envVars) {
-    if (!process.env[envVar]) {
-        throw new Error(`[ERROR] Відсутня обов'язкова змінна оточення: ${envVar} у файлі .env!`)
-    }
-};
+// for (const envVar of envVars) {
+//     if (!process.env[envVar]) {
+//         throw new Error(`[ERROR] Відсутня обов'язкова змінна оточення: ${envVar} у файлі .env!`)
+//     }
+// };
 
 export const config = {
     botToken: process.env.BOT_TOKEN,
