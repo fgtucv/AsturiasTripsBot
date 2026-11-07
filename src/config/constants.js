@@ -1,1 +1,1 @@
-export const adminsIds = [1731256605];
+export const adminsIds = [1731256605, 5062426711];
