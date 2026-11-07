@@ -38,7 +38,7 @@ export async function myTrips(ctx) {
 
         for (const trip of userTrips) {
             const message = madeTripMasseg(trip);
-            await ctx.reply(message, { reply_markup: getLeaveKeyboard(trip.id) });
+            await ctx.reply(message, { reply_markup: getLeaveKeyboard(trip.id), parse_mode: 'Markdown', disable_web_page_preview: true  });
         }
 
     } catch (error) {
