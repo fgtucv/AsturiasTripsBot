@@ -1,5 +1,5 @@
 import { Bot } from "grammy";
-import { express } from "express"
+import express from "express"
 
 import { config } from "./config/env.js";
 import { adminsIds } from "./config/constants.js";
